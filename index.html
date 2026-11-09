@@ -83,6 +83,7 @@ main{padding:12px 12px 110px}
 .textbtn:disabled{opacity:.35}
 .bulk{display:block;width:100%;margin-top:14px;border:1px dashed var(--line);background:transparent;border-radius:12px;padding:12px;font-size:14px;color:var(--muted)}
 .bulk b{color:var(--know)}
+.intro{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px;font-size:14px}.intro strong{font-size:16px}.intro p{margin:6px 0 0}.intro .privacy{font-size:12px;color:var(--muted)}
 .hint{font-size:13px;color:var(--muted);text-align:center;margin:14px 6px 0}
 
 /* Selected state, shared */
@@ -190,6 +191,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border:2px solid var(
 </header>
 
 <main class="wrap">
+  <aside class="intro" aria-label="How to use"><strong>Help shape the Kane Xmas setlist</strong><p>Slide each song to show how well you know it. Tick <b>Keen to learn</b> for any you fancy; we’ll pick just a few to learn. Use Quick or List, then add your name and tap <b>Send to Costa</b>.</p><p class="privacy">Answers stay in your browser until you send them. Sharing this link won’t share your answers. You can come back, edit and resend.</p><p id="releaseNote" class="privacy hidden"></p></aside>
   <!-- Quick mode -->
   <section id="quick">
     <div class="qcard">
@@ -281,7 +283,19 @@ const ORDER = ["never","dont","kinda","played","know","really","inside"];
 const LABELS = {never:"Never heard it", dont:"Don't know it", played:"Might have played it", kinda:"Kinda know it", know:"Know it", really:"Really know it", inside:"Know it inside out"};
 const ICON = Object.fromEntries(ORDER.map((v,i) => [v, String(i+1)]));
 const COLORS = {never:"var(--dont)",dont:"var(--dont)",played:"var(--kinda)",kinda:"var(--kinda)",know:"var(--know)",really:"var(--know)",inside:"var(--know)"};
-const STORE = "kane-xmas-repcheck-v1";
+const STORE = "kane-xmas-repcheck-release-20261109";
+const LEGACY_STORE = "kane-xmas-repcheck-v1";
+// Start this release clean. Never import or remove earlier browser-local answers.
+try {
+  const earlier = localStorage.getItem(LEGACY_STORE);
+  if (earlier !== null) {
+    const archive = LEGACY_STORE + "-archive-before-release-20261109";
+    try { if (localStorage.getItem(archive) === null) localStorage.setItem(archive, earlier); } catch(e) {}
+    const note = document.getElementById("releaseNote");
+    note.textContent = "This edition starts fresh. Earlier answers are kept separately on this browser.";
+    note.classList.remove("hidden");
+  }
+} catch(e) {}
 // IDs are immutable song identities, retained from the original catalogue.
 // Restore codes MUST retain the original song order, independent of display order.
 const idOf = s => s.id;
