@@ -449,7 +449,7 @@ $("send").onclick = async () => {
   if (!state.name || !state.name.trim()) { st.textContent = "Add your name first."; $("name").focus(); return; }
   btn.disabled = true; btn.textContent = "Sending…"; st.textContent = "";
   try {
-    const r = await fetch("[Easy to use form backend - form endpoints for your HTML forms](https://formsubmit.co/ajax/)" + EMAIL, {
+    const r = await fetch("https://formsubmit.co/ajax/" + EMAIL, {
       method: "POST",
       headers: {"Content-Type":"application/json","Accept":"application/json"},
       body: JSON.stringify({_subject: subject(), _template: "box", _captcha: "false", name: state.name.trim(), answers: buildText()})
@@ -470,7 +470,7 @@ $("send").onclick = async () => {
 };
 $("openSend").onclick = openSend;
 $("close").onclick = () => $("overlay").classList.remove("open");
-$("overlay").onclick = e => { if ([e.target.id](http://e.target.id) === "overlay") $("overlay").classList.remove("open"); };
+$("overlay").onclick = e => { if (e.target.id === "overlay") $("overlay").classList.remove("open"); };
 $("name").value = state.name || "";
 $("notes").value = state.notes || "";
 $("name").oninput = e => { state.name = e.target.value; save(); updateSend(); };
