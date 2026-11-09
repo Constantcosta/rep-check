@@ -147,6 +147,14 @@ summary{color:var(--muted);cursor:pointer}
 #out{height:160px;font-size:12.5px;font-family:ui-monospace,Menlo,monospace;resize:vertical;margin-top:8px}
 .toast{position:fixed;left:50%;bottom:86px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:12px;font-size:14px;z-index:20;display:flex;gap:14px;align-items:center;box-shadow:0 4px 14px rgba(0,0,0,.25)}
 .toast button{border:0;background:none;color:var(--bg);font-weight:800;text-decoration:underline}
+/* Explicit slider paint avoids native accent-colour caching and transitions. */
+input[type=range]{--slider-colour:var(--muted);--fill:50%;appearance:none!important;-webkit-appearance:none!important;border:0;outline-offset:4px;background:linear-gradient(to right,var(--slider-colour) 0 var(--fill),var(--line) var(--fill) 100%) center/100% 8px no-repeat;transition:none!important}
+.slider-track input{background:linear-gradient(to top,var(--slider-colour) 0 var(--fill),var(--line) var(--fill) 100%) center/8px 100% no-repeat}
+input[type=range]::-webkit-slider-runnable-track{background:transparent;border:0;box-shadow:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:20px;height:20px;border:2px solid var(--card);border-radius:50%;background:var(--slider-colour);box-shadow:0 0 0 1px var(--slider-colour);transition:none!important}
+input[type=range]::-moz-range-track{background:transparent;border:0}
+input[type=range]::-moz-range-progress{background:transparent}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border:2px solid var(--card);border-radius:50%;background:var(--slider-colour);box-shadow:0 0 0 1px var(--slider-colour);transition:none!important}
 </style>
 </head>
 <body>
@@ -303,12 +311,21 @@ function sliderColour(score){
   const hue = Math.round(score / 29 * 135);
   return "hsl(" + hue + " 68% var(--slider-lightness))";
 }
+function paintSlider(range,score){
+  range.style.setProperty("--slider-colour", sliderColour(score));
+  range.style.setProperty("--fill", Number.isInteger(score) ? (score/29*100)+"%" : "0%");
+}
+let scoreFrame = null;
+function scheduleScoreSave(){
+  if(scoreFrame !== null) return;
+  scoreFrame = requestAnimationFrame(() => { scoreFrame=null;save();updateCounts(); });
+}
 function scoreLabel(score){ return LABELS[ORDER[Math.round(score*6/29)]]; }
 function setScore(s,score){
   const id = idOf(s);
   state.scores[id] = Math.max(0,Math.min(29,Math.round(score)));
   state.marks[id] = ORDER[Math.round(state.scores[id]*6/29)];
-  save(); updateCounts();
+  scheduleScoreSave();
 }
 function setMark(s, v){
   const id = idOf(s);
@@ -372,7 +389,7 @@ $("qkeen").onchange = e => setKeen(idOf(SONGS[state.qi]), e.target.checked);
 function paintQuickButtons(){
   const id = idOf(SONGS[state.qi]), score = state.scores[id], marked = Number.isInteger(score);
   $("qrange").value = marked ? score : 15;
-  $("qrange").style.accentColor = sliderColour(marked ? score : null);
+  paintSlider($("qrange"),marked ? score : null);
   $("qrange").setAttribute("aria-valuetext", marked ? scoreLabel(score)+", "+(score+1)+" of 30" : "Unanswered. Move the slider to answer.");
   $("qvalue").textContent = marked ? (score+1) + " / 30 · " + scoreLabel(score) : "Unanswered · tap or drag to choose";
   $("qbtns").querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(marked && b.dataset.level === state.marks[id])));
@@ -441,12 +458,12 @@ function rowFor(s){
   const paint = () => {
     const score = state.scores[id], marked = Number.isInteger(score);
     range.value = marked ? score : 15;
-    range.style.accentColor = sliderColour(marked ? score : null);
+    paintSlider(range,marked ? score : null);
     caption.textContent = marked ? (score+1)+" / 30 · "+scoreLabel(score) : "Unanswered · tap or drag to choose";
     range.setAttribute("aria-valuetext",caption.textContent);
   };
   paint();
-  range.oninput = () => { setScore(s,Number(range.value)); paint(); updateSetHeads(); };
+  range.oninput = () => { setScore(s,Number(range.value)); paint(); };
   range.onpointerup = () => { setScore(s,Number(range.value)); paint(); updateSetHeads(); };
   range.onchange = () => { setScore(s,Number(range.value)); paint(); if(filter === "unmarked" || ORDER.includes(filter)) renderList(); };
   const clear = el("button",{class:"textbtn","aria-label":"Clear familiarity: "+s.title,text:"Clear"});
