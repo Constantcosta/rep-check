@@ -35,6 +35,19 @@ h1{font-size:17px;margin:0;letter-spacing:-.01em}
 main{padding:12px 12px 110px}
 .hidden{display:none!important}
 
+/* Familiarity spectrum */
+.qbtns{grid-template-columns:1fr!important;gap:7px!important}
+.qbtns button{min-height:44px!important;justify-content:flex-start!important;padding:8px 14px;font-size:15px!important}
+.keen{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin:12px 0 4px;font-weight:600;font-size:15px}
+.keen input{width:22px;height:22px;accent-color:var(--learn);flex-shrink:0}
+.keen small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+.row{flex-wrap:wrap;padding:10px}
+.row .info{flex-basis:100%}
+.mini{width:100%;align-items:center;gap:8px}
+.mini select{flex:1;min-width:0;font:inherit;font-size:14px;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px 6px}
+.mini label{display:flex;align-items:center;gap:5px;font-size:12px;white-space:nowrap}
+.mini input{width:20px;height:20px;accent-color:var(--learn)}
+[data-v][aria-pressed="true"]{background:var(--know)!important;border-color:var(--know)!important}
 /* Quick mode */
 .qcard{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px 18px 16px}
 .qtop{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.03em;text-transform:uppercase}
@@ -147,13 +160,14 @@ summary{color:var(--muted);cursor:pointer}
         <div><small>Lead</small><b id="qwho"></b></div>
       </div>
     </div>
+    <label class="keen"><input type="checkbox" id="qkeen"><span>Keen to learn<small>Separate from familiarity. Tick before choosing a level.</small></span></label>
     <div class="qbtns" id="qbtns"></div>
     <div class="qnav">
       <button class="textbtn" id="qback">‹ Back</button>
       <button class="textbtn" id="qskip">Skip ›</button>
     </div>
     <button class="bulk" id="qbulk">Know most of them? Mark all <span id="qleft"></span> unanswered as <b>Know it</b>, then just fix the exceptions.</button>
-    <p class="hint">Answers save on this phone as you go. Come back anytime to change them.</p>
+    <p class="hint">Tap a familiarity level to move on. Keen to learn is independent. Answers save on this phone as you go.</p>
   </section>
 
   <!-- All done -->
@@ -206,7 +220,7 @@ summary{color:var(--muted);cursor:pointer}
     </details>
     <details>
       <summary>New phone? Restore answers from a code</summary>
-      <p class="sub" style="margin-top:8px">Every email you send ends with a restore code. Paste it here to bring your answers back.</p>
+      <p class="sub" style="margin-top:8px">Every email ends with a restore code. New and old codes work here. Restoring replaces your current answers; a local backup is kept.</p>
       <input type="text" id="code" placeholder="RC-…" autocomplete="off" autocapitalize="characters">
       <div class="btnrow"><button class="ghost" id="restore">Restore</button><button class="ghost" id="reset">Clear all answers</button></div>
       <div class="status" id="restoreStatus"></div>
@@ -217,17 +231,33 @@ summary{color:var(--muted);cursor:pointer}
 <script>
 const SONGS = [{"set": "Set 1", "pos": 1, "title": "Better Be Home Soon", "artist": "Crowded House", "key": "C", "bpm": "96", "who": "Costas"}, {"set": "Set 1", "pos": 2, "title": "BIRDS OF A FEATHER", "artist": "Billie Eilish", "key": "D", "bpm": "105", "who": "Melissa"}, {"set": "Set 1", "pos": 3, "title": "Change the World", "artist": "Eric Clapton", "key": "E", "bpm": "97", "who": "Costas"}, {"set": "Set 1", "pos": 4, "title": "Confidence", "artist": "Ocean Alley", "key": "Gm", "bpm": "70", "who": "Melissa"}, {"set": "Set 1", "pos": 5, "title": "Dancin'", "artist": "Chris Isaak", "key": "Eb", "bpm": "123", "who": "Costas"}, {"set": "Set 1", "pos": 6, "title": "Don't Dream It's Over", "artist": "Crowded House", "key": "Db", "bpm": "81", "who": "Costas"}, {"set": "Set 1", "pos": 7, "title": "It Runs Through Me", "artist": "Tom Misch", "key": "Bm", "bpm": "192", "who": "Costas"}, {"set": "Set 1", "pos": 8, "title": "Just the Two of Us", "artist": "Bill Withers & Grover Washington, Jr.", "key": "Ebm", "bpm": "96", "who": "Costas"}, {"set": "Set 1", "pos": 9, "title": "So Easy (To Fall In Love)", "artist": "Olivia Dean", "key": "Eb", "bpm": "140", "who": "Melissa"}, {"set": "Set 1", "pos": 10, "title": "Somebody’S Crying", "artist": "Chris Isaak", "key": "F#", "bpm": "114", "who": "Costas"}, {"set": "Set 1", "pos": 11, "title": "The Way It Is", "artist": "Bruce Hornsby & The Range", "key": "G", "bpm": "111", "who": "Costas"}, {"set": "Set 1", "pos": 12, "title": "Wicked Game", "artist": "Chris Isaak", "key": "A", "bpm": "113", "who": "Costas"}, {"set": "Set 1", "pos": 13, "title": "Would I Lie To You?", "artist": "Charles & Eddie", "key": "G", "bpm": "101", "who": "Melissa"}, {"set": "Set 1", "pos": 14, "title": "The Best", "artist": "Tina Turner", "key": "F", "bpm": "104", "who": "Melissa"}, {"set": "Set 1", "pos": 15, "title": "Can't Take My Eyes Off You", "artist": "Frankie Valli", "key": "E", "bpm": "136", "who": "Melissa"}, {"set": "Set 1", "pos": 16, "title": "Drive", "artist": "Incubus", "key": "Em", "bpm": "90", "who": "Costas"}, {"set": "Set 1", "pos": 17, "title": "Escape (The Pina Colada Song)", "artist": "Rupert Holmes", "key": "A", "bpm": "70", "who": "Costas"}, {"set": "Set 1", "pos": 18, "title": "Everywhere", "artist": "Fleetwood Mac", "key": "E", "bpm": "115", "who": "Melissa"}, {"set": "Set 1", "pos": 19, "title": "Ain't No Mountain High Enough", "artist": "Marvin Gaye & Tammi Terrell", "key": "D", "bpm": "127", "who": "Melissa"}, {"set": "Set 1", "pos": 20, "title": "Come Together", "artist": "The Beatles", "key": "Am", "bpm": "83", "who": "Costas"}, {"set": "Set 1", "pos": 21, "title": "Easy Lover", "artist": "Philip Bailey & Phil Collins", "key": "Em", "bpm": "129", "who": "Melissa"}, {"set": "Set 1", "pos": 22, "title": "Everybody Wants to Rule the World", "artist": "Tears for Fears", "key": "E", "bpm": "112", "who": "Melissa"}, {"set": "Set 1", "pos": 23, "title": "Iris", "artist": "The Goo Goo Dolls", "key": "Am", "bpm": "154", "who": "Costas"}, {"set": "Set 1", "pos": 24, "title": "Electric Feel", "artist": "MGMT", "key": "Cm", "bpm": "103", "who": "Melissa"}, {"set": "Set 1", "pos": 25, "title": "It's Only Natural", "artist": "Crowded House", "key": "Bb", "bpm": "116", "who": "Costas"}, {"set": "Set 1", "pos": 26, "title": "A Thousand Miles", "artist": "Vanessa Carlton", "key": "B", "bpm": "96", "who": "Melissa"}, {"set": "Set 1", "pos": 27, "title": "Man I Need", "artist": "Olivia Dean", "key": "Db", "bpm": "119", "who": "Melissa"}, {"set": "Set 3", "pos": 1, "title": "Ain't It Fun", "artist": "Paramore", "key": "E", "bpm": "104", "who": "Melissa"}, {"set": "Set 3", "pos": 2, "title": "April Sun In Cuba", "artist": "Dragon", "key": "Bb", "bpm": "120", "who": "Melissa"}, {"set": "Set 3", "pos": 3, "title": "...Baby One More Time", "artist": "Britney Spears", "key": "Cm", "bpm": "93", "who": "Melissa"}, {"set": "Set 3", "pos": 4, "title": "Bring Me To Life", "artist": "Evanescence", "key": "Em", "bpm": "95", "who": "Melissa"}, {"set": "Set 3", "pos": 5, "title": "Complicated", "artist": "Avril Lavigne", "key": "Eb", "bpm": "78", "who": "Melissa"}, {"set": "Set 3", "pos": 6, "title": "Everlong", "artist": "Foo Fighters", "key": "D", "bpm": "156", "who": "Costas"}, {"set": "Set 3", "pos": 7, "title": "Ex's & Oh's", "artist": "Elle King", "key": "Dm", "bpm": "128", "who": "Melissa"}, {"set": "Set 3", "pos": 8, "title": "Flame Trees", "artist": "Cold Chisel", "key": "E", "bpm": "120", "who": "Melissa"}, {"set": "Set 3", "pos": 9, "title": "The Horses", "artist": "Daryl Braithwaite", "key": "B", "bpm": "94", "who": "Melissa"}, {"set": "Set 3", "pos": 10, "title": "I Don't Want To Miss A Thing", "artist": "Aerosmith", "key": "E", "bpm": "121", "who": "Melissa"}, {"set": "Set 3", "pos": 11, "title": "Love Story", "artist": "Taylor Swift", "key": "D", "bpm": "120", "who": "Melissa"}, {"set": "Set 3", "pos": 12, "title": "Flowers", "artist": "Miley Cyrus", "key": "Am", "bpm": "118", "who": "Melissa"}, {"set": "Set 3", "pos": 13, "title": "Espresso", "artist": "Sabrina Carpenter", "key": "Am", "bpm": "104", "who": "Melissa"}, {"set": "Set 3", "pos": 14, "title": "Dreams", "artist": "Fleetwood Mac", "key": "C", "bpm": "120", "who": "Melissa"}, {"set": "Set 3", "pos": 15, "title": "(Lover) You Don't Treat Me No Good", "artist": "Sonia Dada", "key": "B", "bpm": "87", "who": "Melissa"}, {"set": "Set 3", "pos": 16, "title": "Master Blaster (Jammin')", "artist": "Stevie Wonder", "key": "Gm", "bpm": "131", "who": "Costas"}, {"set": "Set 3", "pos": 17, "title": "Naive", "artist": "The Kooks", "key": "G#m", "bpm": "102", "who": "Melissa"}, {"set": "Set 3", "pos": 18, "title": "Never Tear Us Apart", "artist": "INXS", "key": "Am", "bpm": "195", "who": "Melissa"}, {"set": "Set 3", "pos": 19, "title": "No Diggity", "artist": "Blackstreet", "key": "F#m", "bpm": "89", "who": "Costas"}, {"set": "Set 3", "pos": 20, "title": "Proud Mary", "artist": "Tina Turner", "key": "D", "bpm": "171", "who": "Melissa"}, {"set": "Set 3", "pos": 21, "title": "Real World", "artist": "Matchbox Twenty", "key": "A", "bpm": "118", "who": "Costas"}, {"set": "Set 3", "pos": 22, "title": "Say You'll Be There", "artist": "Spice Girls", "key": "Db", "bpm": "107", "who": "Melissa"}, {"set": "Set 3", "pos": 23, "title": "Seven Nation Army", "artist": "The White Stripes", "key": "C#m", "bpm": "124", "who": "Costas"}, {"set": "Set 3", "pos": 24, "title": "Señorita", "artist": "Justin Timberlake", "key": "Dm", "bpm": "98", "who": "Costas"}, {"set": "Set 3", "pos": 25, "title": "Shallow", "artist": "Lady Gaga & Bradley Cooper", "key": "G", "bpm": "96", "who": "Melissa"}, {"set": "Set 3", "pos": 26, "title": "Smooth", "artist": "Santana", "key": "Dm", "bpm": "116", "who": "Melissa"}, {"set": "Set 3", "pos": 27, "title": "Somebody Like You", "artist": "Keith Urban", "key": "E", "bpm": "111", "who": "Melissa"}, {"set": "Set 3", "pos": 28, "title": "Stick Season", "artist": "Noah Kahan", "key": "A", "bpm": "118", "who": "Costas"}, {"set": "Set 3", "pos": 29, "title": "Sweet Caroline", "artist": "Neil Diamond", "key": "E", "bpm": "127", "who": "Melissa"}, {"set": "Set 3", "pos": 30, "title": "Tennessee Whiskey", "artist": "Chris Stapleton", "key": "A", "bpm": "150", "who": "Costas"}, {"set": "Set 3", "pos": 31, "title": "That’s So True", "artist": "Gracie Abrams", "key": "Db", "bpm": "109", "who": "Melissa"}, {"set": "Set 3", "pos": 32, "title": "Torn", "artist": "Natalie Imbruglia", "key": "F", "bpm": "96", "who": "Melissa"}, {"set": "Set 3", "pos": 33, "title": "Toxic", "artist": "Britney Spears", "key": "Cm", "bpm": "143", "who": "Melissa"}, {"set": "Set 3", "pos": 34, "title": "Water", "artist": "Tyla", "key": "Db", "bpm": "112", "who": "Melissa"}, {"set": "Set 3", "pos": 35, "title": "You Never Can Tell", "artist": "Chuck Berry", "key": "C", "bpm": "157", "who": "Costas"}, {"set": "Set 3", "pos": 36, "title": "Zombie", "artist": "The Cranberries", "key": "Em", "bpm": "84", "who": "Melissa"}, {"set": "Set 4", "pos": 1, "title": "4Ever", "artist": "The Veronicas", "key": "Fm", "bpm": "146", "who": "Melissa"}, {"set": "Set 4", "pos": 2, "title": "9 to 5", "artist": "Dolly Parton", "key": "F", "bpm": "103", "who": "Melissa"}, {"set": "Set 4", "pos": 3, "title": "About Damn Time", "artist": "Lizzo", "key": "Ebm", "bpm": "109", "who": "Melissa"}, {"set": "Set 4", "pos": 4, "title": "All the Small Things", "artist": "blink-182", "key": "C", "bpm": "150", "who": "Melissa"}, {"set": "Set 4", "pos": 5, "title": "Are You Gonna Be My Girl", "artist": "Jet", "key": "A", "bpm": "210", "who": "Melissa"}, {"set": "Set 4", "pos": 6, "title": "Believe", "artist": "Cher", "key": "F#", "bpm": "133", "who": "Melissa"}, {"set": "Set 4", "pos": 7, "title": "Call Me Maybe", "artist": "Carly Rae Jepsen", "key": "G", "bpm": "120", "who": "Melissa"}, {"set": "Set 4", "pos": 8, "title": "Can't Get You Out of My Head", "artist": "Kylie Minogue", "key": "Dm", "bpm": "126", "who": "Melissa"}, {"set": "Set 4", "pos": 9, "title": "Crazy Little Thing Called Love", "artist": "Queen", "key": "D", "bpm": "154", "who": "Melissa"}, {"set": "Set 4", "pos": 10, "title": "Dancing Queen", "artist": "ABBA", "key": "A", "bpm": "100", "who": "Melissa"}, {"set": "Set 4", "pos": 11, "title": "Domino", "artist": "Jessie J", "key": "G", "bpm": "127", "who": "Melissa"}, {"set": "Set 4", "pos": 12, "title": "Don't Start Now", "artist": "Dua Lipa", "key": "Bm", "bpm": "124", "who": "Melissa"}, {"set": "Set 4", "pos": 13, "title": "Don't Stop Me Now", "artist": "Queen", "key": "Ab", "bpm": "156", "who": "Melissa"}, {"set": "Set 4", "pos": 14, "title": "Everybody (Backstreet's Back)", "artist": "Backstreet Boys", "key": "Bbm", "bpm": "108", "who": "Costas"}, {"set": "Set 4", "pos": 15, "title": "Footloose", "artist": "Kenny Loggins", "key": "A", "bpm": "174", "who": "Melissa"}, {"set": "Set 4", "pos": 16, "title": "Forget You", "artist": "CeeLo Green", "key": "C", "bpm": "127", "who": "Melissa"}, {"set": "Set 4", "pos": 17, "title": "Gimme! Gimme! Gimme! (A Man After Midnight)", "artist": "ABBA", "key": "Dm", "bpm": "120", "who": "Melissa"}, {"set": "Set 4", "pos": 18, "title": "I Got You (I Feel Good)", "artist": "James Brown", "key": "D", "bpm": "145", "who": "Melissa"}, {"set": "Set 4", "pos": 19, "title": "I Wanna Dance with Somebody (Who Loves Me)", "artist": "Whitney Houston", "key": "E", "bpm": "122", "who": "Melissa"}, {"set": "Set 4", "pos": 20, "title": "I Will Survive", "artist": "Gloria Gaynor", "key": "Am", "bpm": "116", "who": "Melissa"}, {"set": "Set 4", "pos": 21, "title": "I'm Still Standing", "artist": "Elton John", "key": "Bb", "bpm": "176", "who": "Melissa"}, {"set": "Set 4", "pos": 22, "title": "Just Dance", "artist": "Lady Gaga", "key": "C#m", "bpm": "119", "who": "Melissa"}, {"set": "Set 4", "pos": 23, "title": "Livin' On a Prayer", "artist": "Bon Jovi", "key": "Em", "bpm": "123", "who": "Melissa"}, {"set": "Set 4", "pos": 24, "title": "Locked Out of Heaven", "artist": "Bruno Mars", "key": "Dm", "bpm": "150", "who": "Melissa"}, {"set": "Set 4", "pos": 25, "title": "Love At First Sight", "artist": "Kylie Minogue", "key": "F#", "bpm": "126", "who": "Melissa"}, {"set": "Set 4", "pos": 26, "title": "Love Is in the Air", "artist": "John Paul Young", "key": "F", "bpm": "122", "who": "Melissa"}, {"set": "Set 4", "pos": 27, "title": "Man! I Feel Like A Woman!", "artist": "Shania Twain", "key": "Bb", "bpm": "125", "who": "Melissa"}, {"set": "Set 4", "pos": 28, "title": "Mr. Brightside", "artist": "The Killers", "key": "D", "bpm": "148", "who": "Melissa"}, {"set": "Set 4", "pos": 29, "title": "Party In the U.S.A.", "artist": "Miley Cyrus", "key": "F#", "bpm": "96", "who": "Melissa"}, {"set": "Set 4", "pos": 30, "title": "Raise Your Glass", "artist": "P!nk", "key": "G", "bpm": "123", "who": "Melissa"}, {"set": "Set 4", "pos": 31, "title": "Rock DJ", "artist": "Robbie Williams", "key": "D", "bpm": "103", "who": "Melissa"}, {"set": "Set 4", "pos": 32, "title": "Rock With You", "artist": "Michael Jackson", "key": "Ebm", "bpm": "116", "who": "Melissa"}, {"set": "Set 4", "pos": 33, "title": "Rolling In the Deep", "artist": "Adele", "key": "Cm", "bpm": "105", "who": "Melissa"}, {"set": "Set 4", "pos": 34, "title": "Since U Been Gone", "artist": "Kelly Clarkson", "key": "G", "bpm": "130", "who": "Melissa"}, {"set": "Set 4", "pos": 35, "title": "Sk8er Boi", "artist": "Avril Lavigne", "key": "D", "bpm": "150", "who": "Melissa"}, {"set": "Set 4", "pos": 36, "title": "Smells Like Teen Spirit", "artist": "Nirvana", "key": "Fm", "bpm": "117", "who": "Melissa"}, {"set": "Set 4", "pos": 37, "title": "Spinning Around", "artist": "Kylie Minogue", "key": "F#m", "bpm": "124", "who": "Melissa"}, {"set": "Set 4", "pos": 38, "title": "Still Into You", "artist": "Paramore", "key": "E", "bpm": "136", "who": "Melissa"}, {"set": "Set 4", "pos": 39, "title": "Teenage Dirtbag", "artist": "Wheatus", "key": "G", "bpm": "96", "who": "Melissa"}, {"set": "Set 4", "pos": 40, "title": "Thriller", "artist": "Michael Jackson", "key": "C#m", "bpm": "118", "who": "Melissa"}, {"set": "Set 4", "pos": 41, "title": "Treasure", "artist": "Bruno Mars", "key": "Eb", "bpm": "116", "who": "Melissa"}, {"set": "Set 4", "pos": 42, "title": "Valerie", "artist": "Mark Ronson featuring Amy Winehouse", "key": "Eb", "bpm": "106", "who": "Melissa"}, {"set": "Set 4", "pos": 43, "title": "Wannabe", "artist": "Spice Girls", "key": "Bm", "bpm": "110", "who": "Melissa"}, {"set": "Set 4", "pos": 44, "title": "The Way You Make Me Feel", "artist": "Michael Jackson", "key": "F", "bpm": "120", "who": "Melissa"}, {"set": "Set 4", "pos": 45, "title": "You Belong With Me", "artist": "Taylor Swift", "key": "F#", "bpm": "130", "who": "Melissa"}, {"set": "Set 4", "pos": 46, "title": "You Can Call Me Al", "artist": "Paul Simon", "key": "C", "bpm": "128", "who": "Melissa"}, {"set": "Set 4", "pos": 47, "title": "Blame It On the Boogie", "artist": "The Jacksons", "key": "Eb", "bpm": "113", "who": "Melissa"}, {"set": "Set 4", "pos": 48, "title": "Dancing In the Dark", "artist": "Bruce Springsteen", "key": "B", "bpm": "149", "who": "Melissa"}, {"set": "Set 4", "pos": 49, "title": "Untouched", "artist": "The Veronicas", "key": "A", "bpm": "178", "who": "Melissa"}];
 const EMAIL = "constant.costa@gmail.com";
-const ORDER = ["know","kinda","dont","learn"];
-const LABELS = {know:"Know it", kinda:"Kinda", dont:"Don't know", learn:"Want to learn"};
-const ICON = {know:"✓", kinda:"~", dont:"✕", learn:"+"};
-const COLORS = {know:"var(--know)", kinda:"var(--kinda)", dont:"var(--dont)", learn:"var(--learn)"};
+const ORDER = ["never","dont","played","kinda","know","really","inside"];
+const LABELS = {never:"Never heard it", dont:"Don't know it", played:"Might have played it", kinda:"Kinda know it", know:"Know it", really:"Really know it", inside:"Know it inside out"};
+const ICON = Object.fromEntries(ORDER.map((v,i) => [v, String(i+1)]));
+const COLORS = {never:"var(--dont)",dont:"var(--dont)",played:"var(--kinda)",kinda:"var(--kinda)",know:"var(--know)",really:"var(--know)",inside:"var(--know)"};
 const STORE = "kane-xmas-repcheck-v1";
 const idOf = s => s.set + "|" + s.pos;
 const $ = id => document.getElementById(id);
 const sets = [...new Set(SONGS.map(s => s.set))];
 
-let state = {marks:{}, name:"", notes:"", mode:"quick", qi:null};
-try { const saved = JSON.parse(localStorage.getItem(STORE)); if (saved && saved.marks) state = Object.assign(state, saved); } catch(e) {}
+function migrate(saved){
+  const next = Object.assign({marks:{},keen:{},name:"",notes:"",mode:"quick",qi:null}, saved || {});
+  next.marks = Object.assign({}, next.marks); next.keen = Object.assign({}, next.keen);
+  for (const id of Object.keys(next.marks)) {
+    if (next.marks[id] === "learn") { next.keen[id] = true; delete next.marks[id]; }
+  }
+  next.version = 2;
+  return next;
+}
+let state = migrate(null);
+try {
+  const raw = localStorage.getItem(STORE), saved = JSON.parse(raw);
+  if (saved && saved.marks) {
+    state = migrate(saved);
+    try { if (saved.version !== 2 && !localStorage.getItem(STORE+"-pre-v2")) localStorage.setItem(STORE+"-pre-v2", raw); } catch(e) {}
+  }
+} catch(e) {}
+function setKeen(id, value){ if(value) state.keen[id] = true; else delete state.keen[id]; save(); updateCounts(); }
 function save(){ try { localStorage.setItem(STORE, JSON.stringify(state)); } catch(e) {} }
 
 function el(tag, attrs, ...kids){
@@ -246,7 +276,7 @@ const unmarkedCount = () => SONGS.filter(s => !state.marks[idOf(s)]).length;
 
 function setMark(s, v){
   const id = idOf(s);
-  if (v == null || state.marks[id] === v) delete state.marks[id]; else state.marks[id] = v;
+  if (v == null || v === "") delete state.marks[id]; else state.marks[id] = v;
   save(); updateCounts();
 }
 
@@ -294,16 +324,20 @@ $("mQuick").onclick = () => setMode("quick");
 $("mList").onclick = () => setMode("list");
 
 /* ---------- Quick mode ---------- */
+let advancing = false;
 ORDER.forEach(v => {
   const b = el("button",{"data-v":v,"aria-pressed":"false"}, icon(v), LABELS[v]);
   b.onclick = () => {
+    if (advancing) return;
+    advancing = true;
     const s = SONGS[state.qi];
     state.marks[idOf(s)] = v; save(); updateCounts();
     paintQuickButtons();
-    setTimeout(() => { state.qi++; save(); refresh(); }, 160);
+    setTimeout(() => { state.qi++; advancing = false; save(); refresh(); }, 160);
   };
   $("qbtns").appendChild(b);
 });
+$("qkeen").onchange = e => setKeen(idOf(SONGS[state.qi]), e.target.checked);
 function paintQuickButtons(){
   const m = state.marks[idOf(SONGS[state.qi])];
   $("qbtns").querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === m)));
@@ -311,6 +345,7 @@ function paintQuickButtons(){
 function showQuick(){
   $("quick").classList.remove("hidden"); $("done").classList.add("hidden");
   const s = SONGS[state.qi];
+  $("qkeen").checked = !!state.keen[idOf(s)];
   const inSet = SONGS.filter(x => x.set === s.set).length;
   $("qset").textContent = s.set + " · " + s.pos + " of " + inSet;
   $("qnum").textContent = (state.qi+1) + " / " + SONGS.length;
@@ -344,8 +379,8 @@ $("doneSend").onclick = () => openSend();
 
 /* ---------- List mode ---------- */
 let filter = "all", query = "";
-ORDER.forEach(v => $("legend").appendChild(el("span",{}, icon(v), LABELS[v])));
-const FILTERS = [["all","All"], ...sets.map(s => [s,s]), ["unmarked","Unanswered"], ...ORDER.map(v => [v, LABELS[v]])];
+$("legend").textContent = "Familiarity: 1 (never heard) to 7 (inside out). Keen to learn is a separate choice.";
+const FILTERS = [["all","All"], ...sets.map(s => [s,s]), ["unmarked","Unanswered"], ["keen","Keen to learn"], ...ORDER.map(v => [v, LABELS[v]])];
 FILTERS.forEach(([v,label]) => {
   const b = el("button",{class:"chip","aria-pressed":String(v===filter),"data-f":v,text:label});
   b.onclick = () => { filter = v; document.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed", String(c.dataset.f===filter))); renderList(); };
@@ -355,6 +390,7 @@ $("search").oninput = e => { query = e.target.value.trim().toLowerCase(); render
 function matches(s){
   const m = state.marks[idOf(s)];
   if (filter === "unmarked" && m) return false;
+  if (filter === "keen" && !state.keen[idOf(s)]) return false;
   if (ORDER.includes(filter) && m !== filter) return false;
   if (sets.includes(filter) && s.set !== filter) return false;
   if (query && !(s.title + " " + s.artist).toLowerCase().includes(query)) return false;
@@ -364,18 +400,16 @@ function rowFor(s){
   const id = idOf(s);
   const row = el("div",{class:"row","data-s":state.marks[id]||""});
   row.appendChild(el("div",{class:"info"}, el("div",{class:"rt",text:s.title}), el("div",{class:"ra",text:s.artist + " · " + s.key + " · " + s.bpm + " bpm · " + s.who})));
-  const mini = el("div",{class:"mini",role:"group","aria-label":s.title});
-  ORDER.forEach(v => {
-    const b = el("button",{"data-v":v,"aria-pressed":String(state.marks[id]===v),"aria-label":LABELS[v],title:LABELS[v],text:ICON[v]});
-    b.onclick = () => {
-      setMark(s, v);
-      row.dataset.s = state.marks[id] || "";
-      mini.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(state.marks[id]===x.dataset.v)));
-      updateSetHeads();
-      if (filter === "unmarked" || ORDER.includes(filter)) setTimeout(renderList, 350);
-    };
-    mini.appendChild(b);
-  });
+  const mini = el("div",{class:"mini"});
+  const select = el("select",{"aria-label":"Familiarity: " + s.title});
+  select.appendChild(el("option",{value:"",text:"Unanswered"}));
+  ORDER.forEach((v,i) => select.appendChild(el("option",{value:v,text:(i+1)+" · "+LABELS[v]})));
+  select.value = state.marks[id] || "";
+  select.onchange = () => { setMark(s,select.value); row.dataset.s = state.marks[id] || ""; updateSetHeads(); if (filter === "unmarked" || ORDER.includes(filter)) renderList(); };
+  const keen = el("input",{type:"checkbox","aria-label":"Keen to learn: " + s.title});
+  keen.checked = !!state.keen[id];
+  keen.onchange = () => { setKeen(id,keen.checked); if(filter === "keen") renderList(); };
+  mini.appendChild(select); mini.appendChild(el("label",{},keen,"Keen to learn"));
   row.appendChild(mini);
   return row;
 }
@@ -410,25 +444,41 @@ function updateSetHeads(){
 
 /* ---------- Counts ---------- */
 function updateCounts(){
-  const n = {know:0,kinda:0,dont:0,learn:0};
-  SONGS.forEach(s => { const m = state.marks[idOf(s)]; if (m) n[m]++; });
+  const n = Object.fromEntries(ORDER.map(v => [v,0]));
+  SONGS.forEach(s => { const m = state.marks[idOf(s)]; if (ORDER.includes(m)) n[m]++; });
   $("markedCount").textContent = ORDER.reduce((a,v) => a + n[v], 0);
   const p = $("progress"); p.innerHTML = "";
   ORDER.forEach(v => p.appendChild(el("span",{style:"width:" + (n[v]/SONGS.length*100) + "%;background:" + COLORS[v]})));
   const c = $("counts"); c.innerHTML = "";
-  ORDER.forEach(v => c.appendChild(el("span",{title:LABELS[v]}, icon(v), el("b",{text:String(n[v])}))));
+  ORDER.forEach(v => c.appendChild(el("span",{title:LABELS[v],"aria-label":LABELS[v]+": "+n[v]}, icon(v), el("b",{text:String(n[v])}))));
+  c.appendChild(el("span",{text:"Keen to learn: " + SONGS.filter(s => state.keen[idOf(s)]).length}));
 }
 
 /* ---------- Sending ---------- */
-const CODE_MAP = {know:"1",kinda:"2",dont:"3",learn:"4"};
-function makeCode(){ return "RC-" + SONGS.map(s => CODE_MAP[state.marks[idOf(s)]] || "0").join(""); }
+function makeCode(){ return "RC2-" + SONGS.map(s => ((ORDER.indexOf(state.marks[idOf(s)])+1) | (state.keen[idOf(s)] ? 8 : 0)).toString(16)).join("").toUpperCase(); }
+function decodeCode(code){
+  const raw = code.trim().toUpperCase().replace(/\s/g, "");
+  const v2 = raw.startsWith("RC2-");
+  const digits = raw.replace(v2 ? /^RC2-/ : /^RC-?/, "");
+  if (digits.length !== SONGS.length || (v2 ? /[^0-9A-F]/ : /[^0-4]/).test(digits)) throw new Error("Invalid restore code");
+  const marks = {}, keen = {}, old = {"1":"know","2":"kinda","3":"dont"};
+  SONGS.forEach((s,i) => {
+    const id = idOf(s), n = parseInt(digits[i],16);
+    if (v2) { if(n & 7) marks[id] = ORDER[(n & 7)-1]; if(n & 8) keen[id] = true; }
+    else { if(old[digits[i]]) marks[id] = old[digits[i]]; if(digits[i] === "4") keen[id] = true; }
+  });
+  return {marks,keen};
+}
 function buildText(){
   const L = [];
   if (state.name && state.name.trim()) L.push("From: " + state.name.trim());
   const marked = SONGS.length - unmarkedCount();
   L.push(marked + " of " + SONGS.length + " answered");
   if (state.notes && state.notes.trim()) L.push("", "Notes: " + state.notes.trim());
-  ["dont","learn","kinda","know"].forEach(v => {
+  const keen = SONGS.filter(s => state.keen[idOf(s)]);
+  L.push("", "KEEN TO LEARN (" + keen.length + ") — independent of familiarity");
+  keen.forEach(s => L.push("- " + s.title + " – " + s.artist + " (" + s.set + "; " + (LABELS[state.marks[idOf(s)]] || "familiarity unanswered") + ")"));
+  ORDER.forEach(v => {
     const list = SONGS.filter(s => state.marks[idOf(s)] === v);
     L.push("", LABELS[v].toUpperCase() + " (" + list.length + ")");
     list.forEach(s => L.push("- " + s.title + " – " + s.artist + " (" + s.set + ")"));
@@ -481,18 +531,18 @@ $("copy").onclick = async () => {
   catch(e) { const o = $("out"); o.focus(); o.select(); try { o.setSelectionRange(0, text.length); } catch(_) {} $("copyStatus").textContent = "Couldn't copy automatically. The text is selected, so copy it by hand."; }
 };
 $("restore").onclick = () => {
-  const raw = $("code").value.trim().toUpperCase().replace(/^RC-?/, "").replace(/\s/g, "");
-  if (raw.length !== SONGS.length || /[^0-4]/.test(raw)) { $("restoreStatus").textContent = "That code doesn't look right. Paste the whole line after 'Restore code:'."; return; }
-  const inv = {"1":"know","2":"kinda","3":"dont","4":"learn"};
-  state.marks = {};
-  SONGS.forEach((s,i) => { if (inv[raw[i]]) state.marks[idOf(s)] = inv[raw[i]]; });
+  let restored;
+  try { restored = decodeCode($("code").value); }
+  catch(e) { $("restoreStatus").textContent = "That code doesn't look right. Paste the whole code after 'Restore code:'."; return; }
+  try { localStorage.setItem(STORE+"-before-restore", JSON.stringify(state)); } catch(e) {}
+  Object.assign(state,restored);
   state.qi = null; save(); updateCounts(); refresh(); updateSend();
   $("restoreStatus").textContent = "Answers restored.";
 };
 let resetArmed = false;
 $("reset").onclick = () => {
   if (!resetArmed) { resetArmed = true; $("reset").textContent = "Tap again to clear"; setTimeout(() => { resetArmed = false; $("reset").textContent = "Clear all answers"; }, 3000); return; }
-  state.marks = {}; state.qi = 0; save(); resetArmed = false; $("reset").textContent = "Clear all answers";
+  state.marks = {}; state.keen = {}; state.qi = 0; save(); resetArmed = false; $("reset").textContent = "Clear all answers";
   updateCounts(); refresh(); updateSend(); $("restoreStatus").textContent = "All answers cleared.";
 };
 
