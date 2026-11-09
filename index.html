@@ -180,10 +180,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border:2px solid var(
   <div class="wrap">
     <div class="hrow">
       <div><div style="font-size:12px;color:var(--muted);font-weight:600">Kane Xmas Party</div><h1>Bass rep check</h1></div>
-      <div class="seg" role="group" aria-label="View">
-        <button id="mQuick" aria-pressed="true">Quick</button>
-        <button id="mList" aria-pressed="false">List</button>
-      </div>
+
     </div>
     <div class="progress" id="progress"></div>
     <div class="counts" id="counts"></div>
@@ -191,48 +188,9 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border:2px solid var(
 </header>
 
 <main class="wrap">
-  <aside class="intro" aria-label="How to use"><strong>Help shape the Kane Xmas setlist</strong><p>Slide each song to show how well you know it. Tick <b>Keen to learn</b> for any you fancy; we’ll pick just a few to learn. Use Quick or List, then add your name and tap <b>Send to Costa</b>.</p><p class="privacy">Answers stay in your browser until you send them. Sharing this link won’t share your answers. You can come back, edit and resend.</p><p id="releaseNote" class="privacy hidden"></p></aside>
-  <!-- Quick mode -->
-  <section id="quick">
-    <div class="qcard">
-      <div class="qtop"><span id="qset"></span><span id="qnum"></span></div>
-      <div class="qtitle" id="qtitle"></div>
-      <div class="qartist" id="qartist"></div>
-      <div class="qmeta">
-        <div><small>Key</small><b id="qkey"></b></div>
-        <div><small>BPM</small><b id="qbpm"></b></div>
-        <div><small>Lead</small><b id="qwho"></b></div>
-      </div>
-    </div>
-    <div class="spectrum">
-      <div class="slider-track"><input type="range" min="0" max="29" step="1" value="15" id="qrange" aria-label="Song familiarity" aria-orientation="vertical"></div>
-      <div class="thresholds" id="qbtns"></div>
-    </div>
-    <div class="slider-value" id="qvalue" aria-live="polite"></div>
-    <label class="keen"><input type="checkbox" id="qkeen"><span>Keen to learn<small>Tap here to tick. Independent of how well you know it.</small></span></label>
-    <div class="qnav">
-      <button class="textbtn" id="qback">‹ Back</button>
-      <button class="textbtn" id="qskip">Next ›</button>
-    </div>
-    <button class="bulk" id="qbulk">Know most of them? Mark all <span id="qleft"></span> unanswered as <b>Know it</b>, then just fix the exceptions.</button>
-    <p class="hint">Tap or drag the slider. Labels are guideposts; choose anywhere between them. Tap Next when ready. Answers save as you go.</p>
-  </section>
-
-  <!-- All done -->
-  <section id="done" class="hidden">
-    <div class="done">
-      <h2 id="doneTitle">All done</h2>
-      <p id="doneText"></p>
-      <div class="btnrow" style="justify-content:center">
-        <button class="primary" id="doneSend">Send to Costa</button>
-        <button class="ghost" id="doneReview">Review in list</button>
-      </div>
-      <div class="btnrow" style="justify-content:center"><button class="textbtn" id="doneJump"></button></div>
-    </div>
-  </section>
-
-  <!-- List mode -->
-  <section id="list" class="hidden">
+  <aside class="intro" aria-label="How to use"><strong>Help pick the Kane Xmas setlist.</strong><p>Slide to rate what you know. Tick <b>Keen to learn</b> for songs you fancy. Add your name, then <b>Send to Costa</b>.</p><p class="privacy">Saves on this browser. Edit and resend anytime.</p><p id="releaseNote" class="privacy hidden"></p></aside>
+  <!-- Song list -->
+  <section id="list">
     <div class="tools" id="filters"></div>
     <input type="search" id="search" placeholder="Search title or artist" autocomplete="off">
     <div class="legend" id="legend"></div>
@@ -395,85 +353,9 @@ function bulkKnow(songs){
   toast("Marked " + n + " as Know it", () => { state.marks = before; state.scores = beforeScores; save(); updateCounts(); refresh(); });
 }
 
-/* ---------- Modes ---------- */
-function setMode(m){
-  state.mode = m; save();
-  $("mQuick").setAttribute("aria-pressed", String(m==="quick"));
-  $("mList").setAttribute("aria-pressed", String(m==="list"));
-  refresh();
-  window.scrollTo(0,0);
-}
-function refresh(){
-  const quick = state.mode === "quick";
-  $("list").classList.toggle("hidden", quick);
-  if (quick) {
-    if (state.qi == null || state.qi >= SONGS.length) {
-      const f = firstUnmarked();
-      if (state.qi == null) state.qi = f === -1 ? SONGS.length : f;
-    }
-    if (state.qi >= SONGS.length) showDone(); else showQuick();
-  } else {
-    $("quick").classList.add("hidden"); $("done").classList.add("hidden");
-    renderList();
-  }
-}
-$("mQuick").onclick = () => setMode("quick");
-$("mList").onclick = () => setMode("list");
+/* ---------- Song list ---------- */
+function refresh(){ renderList(); }
 
-/* ---------- Quick mode ---------- */
-[...ORDER].reverse().forEach(v => {
-  const b = el("button",{"aria-pressed":"false","data-level":v,text:LABELS[v]});
-  b.onclick = () => { setScore(SONGS[state.qi],Math.round(ORDER.indexOf(v)*29/6)); paintQuickButtons(); };
-  $("qbtns").appendChild(b);
-});
-$("qrange").oninput = e => { setScore(SONGS[state.qi],Number(e.target.value)); paintQuickButtons(); };
-$("qrange").onpointerup = e => { setScore(SONGS[state.qi],Number(e.target.value)); paintQuickButtons(); };
-$("qrange").onchange = e => { setScore(SONGS[state.qi],Number(e.target.value)); paintQuickButtons(); };
-$("qkeen").onchange = e => setKeen(idOf(SONGS[state.qi]), e.target.checked);
-function paintQuickButtons(){
-  const id = idOf(SONGS[state.qi]), score = state.scores[id], marked = Number.isInteger(score);
-  $("qrange").value = marked ? score : 15;
-  paintSlider($("qrange"),marked ? score : null);
-  $("qrange").setAttribute("aria-valuetext", marked ? scoreLabel(score)+", "+(score+1)+" of 30" : "Unanswered. Move the slider to answer.");
-  $("qvalue").textContent = marked ? (score+1) + " / 30 · " + scoreLabel(score) : "Unanswered · tap or drag to choose";
-  $("qbtns").querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(marked && b.dataset.level === state.marks[id])));
-}
-function showQuick(){
-  $("quick").classList.remove("hidden"); $("done").classList.add("hidden");
-  const s = SONGS[state.qi];
-  $("qkeen").checked = !!state.keen[idOf(s)];
-  const inSet = SONGS.filter(x => x.set === s.set).length;
-  $("qset").textContent = s.set + " · " + s.pos + " of " + inSet;
-  $("qnum").textContent = (state.qi+1) + " / " + SONGS.length;
-  $("qtitle").textContent = s.title;
-  $("qartist").textContent = s.artist;
-  $("qkey").textContent = s.key;
-  $("qbpm").textContent = s.bpm;
-  $("qwho").textContent = s.who;
-  $("qback").disabled = state.qi === 0;
-  paintQuickButtons();
-  const left = unmarkedCount();
-  $("qleft").textContent = left;
-  $("qbulk").classList.toggle("hidden", left < 2);
-}
-$("qback").onclick = () => { if (state.qi > 0) { state.qi--; save(); refresh(); } };
-$("qskip").onclick = () => { state.qi++; save(); refresh(); };
-$("qbulk").onclick = () => bulkKnow(SONGS);
-
-function showDone(){
-  $("quick").classList.add("hidden"); $("done").classList.remove("hidden");
-  const left = unmarkedCount();
-  $("doneTitle").textContent = left ? "End of the list" : "All done – thanks!";
-  $("doneText").textContent = left ? left + " song" + (left>1?"s":"") + " still unanswered. You can send now or go back to them." : "Send your answers to Costa. You can still change anything later.";
-  const j = $("doneJump");
-  j.classList.toggle("hidden", !left);
-  j.textContent = "Go to the unanswered songs ›";
-  j.onclick = () => { state.qi = firstUnmarked(); save(); refresh(); };
-}
-$("doneReview").onclick = () => setMode("list");
-$("doneSend").onclick = () => openSend();
-
-/* ---------- List mode ---------- */
 let filter = "all", query = "";
 $("legend").textContent = "Familiarity: 1 (never heard) to 30 (inside out). Labels are guideposts. Keen to learn is independent.";
 const FILTERS = [["all","All"], ...sets.map(s => [s,s]), ["unmarked","Unanswered"], ["keen","Keen to learn"], ...ORDER.map(v => [v, LABELS[v]])];
@@ -674,7 +556,9 @@ $("reset").onclick = () => {
 /* ---------- Start ---------- */
 $("total").textContent = SONGS.length;
 updateCounts();
-setMode(state.mode === "list" ? "list" : "quick");
+state.mode = "list";
+save();
+refresh();
 </script>
 </body>
 </html>
