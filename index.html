@@ -8,11 +8,11 @@
 <style>
 :root{
   --bg:#f6f5f2;--card:#fff;--ink:#1c1b1a;--muted:#6b6862;--line:#e2dfd8;--chip:#ebe9e4;
-  --know:#1f8a4c;--kinda:#b97d06;--dont:#c2412d;--learn:#3a5bd9;
+  --slider-lightness:30%;--know:#1f8a4c;--kinda:#b97d06;--dont:#c2412d;--learn:#3a5bd9;
 }
 @media (prefers-color-scheme:dark){
   :root{--bg:#141413;--card:#1e1d1b;--ink:#f2f0ea;--muted:#a19d95;--line:#34322e;--chip:#2a2926;
-  --know:#3fbf73;--kinda:#e3a92b;--dont:#e5664f;--learn:#7b95ff;}
+  --slider-lightness:60%;--know:#3fbf73;--kinda:#e3a92b;--dont:#e5664f;--learn:#7b95ff;}
 }
 *{box-sizing:border-box}
 html,body{margin:0}
@@ -298,6 +298,11 @@ const icon = v => el("span",{class:"ic",style:"background:"+COLORS[v],text:ICON[
 const firstUnmarked = (from=0) => { for (let i=from;i<SONGS.length;i++) if (!state.marks[idOf(SONGS[i])]) return i; for (let i=0;i<from;i++) if (!state.marks[idOf(SONGS[i])]) return i; return -1; };
 const unmarkedCount = () => SONGS.filter(s => !state.marks[idOf(s)]).length;
 
+function sliderColour(score){
+  if (!Number.isInteger(score)) return "var(--muted)";
+  const hue = Math.round(score / 29 * 135);
+  return "hsl(" + hue + " 68% var(--slider-lightness))";
+}
 function scoreLabel(score){ return LABELS[ORDER[Math.round(score*6/29)]]; }
 function setScore(s,score){
   const id = idOf(s);
@@ -367,6 +372,7 @@ $("qkeen").onchange = e => setKeen(idOf(SONGS[state.qi]), e.target.checked);
 function paintQuickButtons(){
   const id = idOf(SONGS[state.qi]), score = state.scores[id], marked = Number.isInteger(score);
   $("qrange").value = marked ? score : 15;
+  $("qrange").style.accentColor = sliderColour(marked ? score : null);
   $("qrange").setAttribute("aria-valuetext", marked ? scoreLabel(score)+", "+(score+1)+" of 30" : "Unanswered. Move the slider to answer.");
   $("qvalue").textContent = marked ? (score+1) + " / 30 · " + scoreLabel(score) : "Unanswered · tap or drag to choose";
   $("qbtns").querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(marked && b.dataset.level === state.marks[id])));
@@ -435,6 +441,7 @@ function rowFor(s){
   const paint = () => {
     const score = state.scores[id], marked = Number.isInteger(score);
     range.value = marked ? score : 15;
+    range.style.accentColor = sliderColour(marked ? score : null);
     caption.textContent = marked ? (score+1)+" / 30 · "+scoreLabel(score) : "Unanswered · tap or drag to choose";
     range.setAttribute("aria-valuetext",caption.textContent);
   };
