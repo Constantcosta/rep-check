@@ -155,6 +155,23 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;
 input[type=range]::-moz-range-track{background:transparent;border:0}
 input[type=range]::-moz-range-progress{background:transparent}
 input[type=range]::-moz-range-thumb{width:16px;height:16px;border:2px solid var(--card);border-radius:50%;background:var(--slider-colour);box-shadow:0 0 0 1px var(--slider-colour);transition:none!important}
+/* Approved horizontal card view; Quick remains unchanged. */
+#list .legend{display:none}
+#list .lst{background:transparent;border:0;border-radius:0;overflow:visible}
+#list .row{display:block;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}
+#list .rt{font-size:17px;letter-spacing:-.25px;white-space:normal;line-height:1.3}
+#list .ra{font-size:12px;margin-top:3px}
+#list .mini{display:block;width:100%;margin-top:14px}
+#list .list-score{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
+#list .selected-familiarity{font-size:20px;font-weight:750;letter-spacing:-.35px;line-height:1.25}
+#list .score-number{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+#list .list-range{display:block;width:100%;height:30px;margin:0;min-width:0}
+#list .range-ends{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:-2px}
+#list .answer-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:13px}
+#list .answer-actions label{display:flex;align-items:center;gap:8px;border:1px solid var(--learn);border-radius:9px;background:var(--bg);padding:9px 11px;width:fit-content;font-size:13px;color:var(--ink);font-weight:650;cursor:pointer}
+#list .answer-actions label:has(input:checked){background:var(--learn);color:var(--bg)}
+#list .answer-actions input{width:19px;height:19px;margin:0}
+#list .answer-actions .textbtn{width:auto;height:auto;border:0;padding:8px;background:none;font-size:12px;font-weight:500;color:var(--muted);text-decoration:underline}
 </style>
 </head>
 <body>
@@ -455,12 +472,16 @@ function rowFor(s){
   const mini = el("div",{class:"mini"});
   const range = el("input",{type:"range",min:"0",max:"29",step:"1",class:"list-range","aria-label":"Familiarity: " + s.title});
   const caption = el("div",{class:"list-score"});
+  const selected = el("span",{class:"selected-familiarity"}), number = el("span",{class:"score-number"});
+  caption.appendChild(selected); caption.appendChild(number);
   const paint = () => {
     const score = state.scores[id], marked = Number.isInteger(score);
     range.value = marked ? score : 15;
     paintSlider(range,marked ? score : null);
-    caption.textContent = marked ? (score+1)+" / 30 · "+scoreLabel(score) : "Unanswered · tap or drag to choose";
-    range.setAttribute("aria-valuetext",caption.textContent);
+    selected.textContent = marked ? scoreLabel(score) : "Not answered yet";
+    selected.style.color = sliderColour(marked ? score : null);
+    number.textContent = marked ? (score+1)+" / 30" : "Tap or drag";
+    range.setAttribute("aria-valuetext",selected.textContent+", "+number.textContent);
   };
   paint();
   range.oninput = () => { setScore(s,Number(range.value)); paint(); };
@@ -471,7 +492,9 @@ function rowFor(s){
   const keen = el("input",{type:"checkbox","aria-label":"Keen to learn: " + s.title});
   keen.checked = !!state.keen[id];
   keen.onchange = () => { setKeen(id,keen.checked); if(filter === "keen") renderList(); };
-  mini.appendChild(range); mini.appendChild(clear); mini.appendChild(el("label",{},keen,"Keen to learn")); mini.appendChild(caption);
+  mini.appendChild(caption); mini.appendChild(range);
+  mini.appendChild(el("div",{class:"range-ends"},el("span",{text:"Never heard"}),el("span",{text:"Inside out"})));
+  mini.appendChild(el("div",{class:"answer-actions"},el("label",{},keen,"Keen to learn"),clear));
   row.appendChild(mini);
   return row;
 }
